@@ -1,8 +1,8 @@
 # ============================================================
 # UE5 Content 文件夹批量创建脚本（Windows PowerShell）
-# 使用方法：
+# 使用方法:
 #   1. 把这个脚本放到你的 UE5 项目根目录（.uproject 同级）
-#   2. 右键 → "用 PowerShell 运行"  或  在终端执行：
+#   2. 右键 → "用 PowerShell 运行" 或 在终端执行:
 #      powershell -ExecutionPolicy Bypass -File .\create_content_folders.ps1
 # ============================================================
 
@@ -25,16 +25,18 @@ $Folders = @(
 
 Write-Host ""
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host "  UE5 Content 文件夹初始化脚本" -ForegroundColor Cyan
+Write-Host "  UE5 Content 文件夹初始化脚本"       -ForegroundColor Cyan
 Write-Host "=====================================" -ForegroundColor Cyan
-Write-Host "目标路径：$ContentPath" -ForegroundColor Gray
+Write-Host "目标路径：$ContentPath"                -ForegroundColor Gray
 Write-Host ""
 
-$Created = 0
-$Skipped = 0
+$Created  = 0
+$Skipped  = 0
 
 foreach ($Folder in $Folders) {
-    $FullPath = Join-Path $ContentPath $Folder
+    $FullPath    = Join-Path $ContentPath $Folder
+    $GitKeepFile = Join-Path $FullPath ".gitkeep"
+
     if (Test-Path $FullPath) {
         Write-Host "  [已存在] $Folder" -ForegroundColor Yellow
         $Skipped++
@@ -42,6 +44,12 @@ foreach ($Folder in $Folders) {
         New-Item -ItemType Directory -Path $FullPath -Force | Out-Null
         Write-Host "  [创建  ] $Folder" -ForegroundColor Green
         $Created++
+    }
+
+    # 确保每个文件夹里都有 .gitkeep，这样 Git 才能追踪空目录
+    if (-not (Test-Path $GitKeepFile)) {
+        New-Item -ItemType File -Path $GitKeepFile -Force | Out-Null
+        Write-Host "           └─ 添加 .gitkeep" -ForegroundColor DarkGray
     }
 }
 
